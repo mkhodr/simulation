@@ -1,5 +1,4 @@
 import math
-import time
 from random import randint, choices
 import string
 
@@ -105,30 +104,3 @@ class Food:
     def __init__(self, nutrition, position=(0,0)):
         self.nutrition = nutrition
         self.position = position
-
-
-arena = Arena()
-
-# for _ in range(8):
-#     arena.spawn_particles()
-
-# for _ in range(10):
-#     arena.respawn_food()
-
-
-arena.render()
-
-
-
-# while True:  # Run indefinitely for demonstration purposes
-#     # Update particle positions
-#     arena.update_particles()
-
-#     # Respawn food items
-#     arena.respawn_food()
-
-#     # Render the arena grid
-#     arena.render()
-
-#     # Introduce a delay (e.g., 1 second) to control the time interval between updates
-#     time.sleep(1)
