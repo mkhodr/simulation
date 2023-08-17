@@ -3,7 +3,7 @@ from random import randint, uniform, choices
 import string
 
 class Arena:
-    def __init__(self, x=200, y=200):
+    def __init__(self, x=100, y=100):
         self.particles = []
         self.foods = []
         # self.grid = [['   ' for _ in range(0,x)] for _ in range(0,y)]
@@ -40,18 +40,29 @@ class Arena:
             particle.move(self.foods)
             self.check_collision(particle)
 
-    def respawn_food(self):
+    def spawn_random_food(self):
         random_position = self.random_position()
         nutrition_value = randint(1,3)
         food = Food(nutrition_value, random_position)
         self.add_food(food)
 
-    def spawn_particles(self):
+    def spawn_food(self, nutrition, position):
+        nutrition_value = nutrition
+        food = Food(nutrition_value, position)
+        self.add_food(food)
+
+    def spawn_random_particle(self):
         name = ''.join(choices(string.ascii_uppercase + string.digits, k=4))
         random_position = self.random_position()
         size = randint(1,5)
         hunger = 10
         self.add_particle(Particle(name, size, hunger, random_position))
+
+    def spawn_particle(self, size, position):
+        name = ''.join(choices(string.ascii_uppercase + string.digits, k=4))
+        hunger = 10
+        self.add_particle(Particle(name, size, hunger, position))
+
 
 
 
@@ -60,7 +71,7 @@ class Particle:
         self.name = name
         self.size = size
         self.hunger = hunger
-        self.velocity = int(5/size)
+        self.velocity = (5/size)
         self.position = position
         
 
@@ -78,6 +89,8 @@ class Particle:
             fx,fy = closest_food.position #food x and y
             dx = x - fx # distance in X axis
             dy = y - fy # distance in Y axis
+            if dx == 0 and dy == 0:
+                return
             # vector = (dx, dy)
             angle = math.atan(abs(dy)/abs(dx)) # in radians
             vx = math.cos(angle)*velocity

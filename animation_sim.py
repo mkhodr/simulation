@@ -11,10 +11,10 @@ particle_no = 10
 food_no = 100
 
 for _ in range(particle_no):
-    arena.spawn_particles()
+    arena.spawn_random_particle()
 
 for _ in range(food_no):
-    arena.respawn_food()
+    arena.spawn_random_food()
 
 
 fig, ax = plt.subplots()
