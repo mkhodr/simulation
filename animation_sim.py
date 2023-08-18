@@ -8,7 +8,7 @@ arena = Arena()
 # Initial Particles counter
 particle_no = 10
 # Initial Food counter
-food_no = 100
+food_no = 200
 
 for _ in range(particle_no):
     arena.spawn_random_particle()
@@ -31,6 +31,6 @@ def animate(frame):
         ax.plot(food.position[0], food.position[1], 'ro', markersize=food.nutrition)
 
 
-ani = FuncAnimation(fig, animate, interval=50, frames=100)
+ani = FuncAnimation(fig, animate, interval=500, frames=100)
 
 plt.show()

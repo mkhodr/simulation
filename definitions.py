@@ -87,12 +87,12 @@ class Particle:
         try:
             closest_food = min(foods, key=lambda food: math.sqrt((food.position[0] - x)**2 + (food.position[1] - y)**2))
             fx,fy = closest_food.position #food x and y
-            dx = x - fx # distance in X axis
-            dy = y - fy # distance in Y axis
+            dx = fx - x # distance in X axis
+            dy = fy - y # distance in Y axis
             if dx == 0 and dy == 0:
                 return
             # vector = (dx, dy)
-            angle = math.atan(abs(dy)/abs(dx)) # in radians
+            angle = math.atan2(dy,dx) # in radians
             vx = math.cos(angle)*velocity
             vy = math.sin(angle)*velocity
             # distance = math.sqrt(dx**2 + dy**2) # distance between the 2 points
@@ -102,8 +102,8 @@ class Particle:
             if dy < vy:
                 vy = abs(dy)
                 # print(f'speed exceeds distance - new speed {yspeed}')
-            new_x = x - vx if dx > 0 else (x + vx if dx < 0 else x)
-            new_y = y - vy if dy > 0 else (y + vy if dy < 0 else y)
+            new_x = x - vx if dx < 0 else (x + vx if dx > 0 else x)
+            new_y = y - vy if dy < 0 else (y + vy if dy > 0 else y)
             new_position = (round(new_x, 1), round(new_y, 1))
             self.position = new_position
             return new_position
