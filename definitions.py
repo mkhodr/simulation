@@ -3,7 +3,7 @@ from random import randint, uniform, choices
 import string
 
 class Arena:
-    def __init__(self, x=100, y=100):
+    def __init__(self, x=250, y=250):
         self.particles = []
         self.foods = []
         # self.grid = [['   ' for _ in range(0,x)] for _ in range(0,y)]
@@ -25,31 +25,65 @@ class Arena:
     #     for row in self.grid:
     #         print(''.join(row))
 
-    def check_collision(self, particle):
-        for food in self.foods:
-            if round(particle.position[0]) == round(food.position[0]) and round(particle.position[1]) == round(food.position[1]):
-                self.foods.remove(food)
-                particle.hunger += food.nutrition
-
     def random_position(self):
         random_position = (round(uniform(0, self.x-1), 1), round(uniform(0, self.y-1), 1))
         return random_position
+    
+    def check_collision(self):
+        foods = set(food.position for food in self.foods)
+        particles = set(particle.position for particle in self.particles)
+        collisions = foods & particles
+        print(collisions)
+        if collisions:
+            for collision in collisions:
+                for particle in self.particles:
+                    if particle.position == collision:
+                        collided_particle = particle
+                for food in self.foods:
+                    if food.position == collision:
+                        collided_food = food
+            collided_particle.check_collision(collided_food)
+            self.foods.remove(collided_food)
+            return True
+        return False
 
-    def update_particles(self):
+
+    def move_particles(self, closest_foods_dict):
         for particle in self.particles:
-            particle.move(self.foods)
-            self.check_collision(particle)
+            closest_food = closest_foods_dict.get(particle.name)
+            particle.move(closest_food)
+
+    def update_closest_food(self):
+        closest_food_dict = {}
+        for particle in self.particles:
+            closest_food = particle.closest_food(self.foods)
+            closest_food_dict[particle.name] = closest_food
+        return closest_food_dict
+
+    # def run_simulation(self, closest_food_dict):
+    #         for particle in self.particles:
+    #             closest_food = closest_foods_dict[particle.name]
+    #             particle.move(closest_food)
+    #             collision = particle.check_collision(closest_food)
+                
+
+
+
+
+
 
     def spawn_random_food(self):
         random_position = self.random_position()
-        nutrition_value = randint(1,3)
+        nutrition_value = randint(1,4)
         food = Food(nutrition_value, random_position)
         self.add_food(food)
+        return
 
     def spawn_food(self, nutrition, position):
         nutrition_value = nutrition
         food = Food(nutrition_value, position)
         self.add_food(food)
+        return
 
     def spawn_random_particle(self):
         name = ''.join(choices(string.ascii_uppercase + string.digits, k=4))
@@ -57,11 +91,13 @@ class Arena:
         size = randint(1,5)
         hunger = 10
         self.add_particle(Particle(name, size, hunger, random_position))
+        return
 
     def spawn_particle(self, size, position):
         name = ''.join(choices(string.ascii_uppercase + string.digits, k=4))
         hunger = 10
         self.add_particle(Particle(name, size, hunger, position))
+        return
 
 
 
@@ -71,7 +107,7 @@ class Particle:
         self.name = name
         self.size = size
         self.hunger = hunger
-        self.velocity = (5/size)
+        self.velocity = (2-(size*0.15))
         self.position = position
         
 
@@ -80,57 +116,52 @@ class Particle:
         if self.hunger <= 0:
             self.size += 1
             self.hunger = 10
+        return
 
-    def move(self, foods):
+    def closest_food(self, foods):
+        x,y = self.position
+        if foods:
+            closest_food = min(foods, key=lambda food: math.sqrt((food.position[0] - x)**2 + (food.position[1] - y)**2))
+            return closest_food
+        return
+
+    def check_collision(self, closest_food):
+        if closest_food:
+            if self.position == closest_food.position:
+                self.hunger += closest_food.nutrition
+                if self.hunger > 10:
+                    self.size += 1
+                    self.hunger = 0
+                return True
+        return False
+
+    def move(self, closest_food):
         x,y = self.position
         velocity = self.velocity
-        try:
-            closest_food = min(foods, key=lambda food: math.sqrt((food.position[0] - x)**2 + (food.position[1] - y)**2))
-            fx,fy = closest_food.position #food x and y
-            dx = fx - x # distance in X axis
-            dy = fy - y # distance in Y axis
-            if dx == 0 and dy == 0:
+        if closest_food:
+            fx,fy = closest_food.position   # food x and y
+            dx = fx - x                     # distance in X axis
+            dy = fy - y                     # distance in Y axis
+            if dx == 0 and dy == 0:         # particle in the same point as the food
                 return
-            # vector = (dx, dy)
-            angle = math.atan2(dy,dx) # in radians
-            vx = math.cos(angle)*velocity
-            vy = math.sin(angle)*velocity
-            # distance = math.sqrt(dx**2 + dy**2) # distance between the 2 points
-            if dx < vx:
-                vx = abs(dx)
-                # print(f'speed exceeds distance - new speed {xspeed}')
-            if dy < vy:
-                vy = abs(dy)
-                # print(f'speed exceeds distance - new speed {yspeed}')
-            new_x = x - vx if dx < 0 else (x + vx if dx > 0 else x)
-            new_y = y - vy if dy < 0 else (y + vy if dy > 0 else y)
-            new_position = (round(new_x, 1), round(new_y, 1))
+                # if self.check_collision(closest_food):
+                #     foods.remove(closest_food)
+            angle = math.atan2(dy,dx)       # in radians
+            if angle < 0:                   # converting negative angles to positive
+                angle += math.pi * 2
+            vx = math.cos(angle)*velocity   # Calculating the X component of the speed
+            vy = math.sin(angle)*velocity   # Calculating the Y component of the speed
+            if abs(dx) < abs(vx):           # Reducing the X speed to the distance if the particle is close enough
+                vx = dx
+            if abs(dy) < abs(vy):           # Reducing the X speed to the distance if the particle is close enough
+                vy = dy
+            new_x = x + vx
+            new_y = y + vy
+            new_position = (new_x, new_y)
             self.position = new_position
-            return new_position
-        except:
             return
-
-        # try:
-        #     closest_food = min(foods, key=lambda food: math.sqrt((food.position[0] - x)**2 + (food.position[1] - y)**2))
-        #     fx,fy = closest_food.position
-        #     dx = x - fx 
-        #     dy = y - fy
-        #     distance = math.sqrt(dx**2 + dy**2)
-        #     if distance == 0:
-        #         return
-        #     if dx < xspeed:
-        #         xspeed = abs(dx)
-        #         # print(f'speed exceeds distance - new speed {xspeed}')
-        #     if dy < yspeed:
-        #         yspeed = abs(dy)
-        #         # print(f'speed exceeds distance - new speed {yspeed}')
-        #     new_x = x - xspeed if dx > 0 else (x + xspeed if dx < 0 else x)
-        #     new_y = y - yspeed if dy > 0 else (y + yspeed if dy < 0 else y)
-        #     new_position = (new_x, new_y)
-        #     self.position = new_position
-        #     return new_position
-        # except:
-        #     return
+        return
+        
 
 
 class Food:
