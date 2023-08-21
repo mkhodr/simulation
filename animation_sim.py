@@ -27,12 +27,12 @@ def animate(frames):
     ax.clear()
     arena.move_particles(arena.closest_food_dict)
     a = arena.check_collision()
-    # particle_positions = np.array([p.position for p in arena.particles])
-    # food_positions = np.array([f.position for f in arena.foods])
-    # if arena.particles:
-    #     ax.plot(particle_positions[: , 0], particle_positions[:, 1], 'bo', markersize=3)
-    # if arena.foods:
-    #     ax.plot(food_positions[:, 0], food_positions[:, 1], 'ro', markersize=2)
+    particle_positions = np.array([p.position for p in arena.particles])
+    food_positions = np.array([f.position for f in arena.foods])
+    if arena.particles:
+        ax.plot(particle_positions[: , 0], particle_positions[:, 1], 'bo', markersize=3)
+    if arena.foods:
+        ax.plot(food_positions[:, 0], food_positions[:, 1], 'ro', markersize=2)
     # for particle in arena.particles:
     #     ax.plot(particle.position[0], particle.position[1], 'bo', markersize=particle.size)
     # for food in arena.foods:
