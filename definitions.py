@@ -9,6 +9,7 @@ class Arena:
         # self.grid = [['   ' for _ in range(0,x)] for _ in range(0,y)]
         self.x = x
         self.y = y
+        self.closest_food_dict = {}
 
     def add_particle(self, Particle):
         self.particles.append(Particle)
@@ -33,7 +34,6 @@ class Arena:
         foods = set(food.position for food in self.foods)
         particles = set(particle.position for particle in self.particles)
         collisions = foods & particles
-        print(collisions)
         if collisions:
             for collision in collisions:
                 for particle in self.particles:
@@ -42,8 +42,9 @@ class Arena:
                 for food in self.foods:
                     if food.position == collision:
                         collided_food = food
-            collided_particle.check_collision(collided_food)
-            self.foods.remove(collided_food)
+                self.foods.remove(collided_food)
+                collided_particle.check_collision(collided_food)
+            self.update_closest_food()
             return True
         return False
 
@@ -54,11 +55,10 @@ class Arena:
             particle.move(closest_food)
 
     def update_closest_food(self):
-        closest_food_dict = {}
         for particle in self.particles:
             closest_food = particle.closest_food(self.foods)
-            closest_food_dict[particle.name] = closest_food
-        return closest_food_dict
+            self.closest_food_dict[particle.name] = closest_food
+        return self.closest_food_dict
 
     # def run_simulation(self, closest_food_dict):
     #         for particle in self.particles:
