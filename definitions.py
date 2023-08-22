@@ -1,12 +1,12 @@
 import math
+import numpy as np
 from random import randint, uniform, choices
 import string
 
 class Arena:
-    def __init__(self, x=250, y=250):
+    def __init__(self, x=500, y=500):
         self.particles = []
         self.foods = []
-        # self.grid = [['   ' for _ in range(0,x)] for _ in range(0,y)]
         self.x = x
         self.y = y
         self.closest_food_dict = {}
@@ -16,15 +16,6 @@ class Arena:
 
     def add_food(self, Food):
         self.foods.append(Food)
-
-    # def render(self):
-    #     self.grid = [['   ' for _ in range(0,self.x)] for _ in range(0,self.y)]
-    #     for particle in self.particles:
-    #         self.grid[particle.position[1]][particle.position[0]] = f'P{particle.name}'
-    #     for food in self.foods:
-    #         self.grid[food.position[1]][food.position[0]] = f'F'
-    #     for row in self.grid:
-    #         print(''.join(row))
 
     def random_position(self):
         random_position = (round(uniform(0, self.x-1), 1), round(uniform(0, self.y-1), 1))
@@ -54,23 +45,12 @@ class Arena:
             closest_food = closest_foods_dict.get(particle.name)
             particle.move(closest_food)
 
+    
     def update_closest_food(self):
         for particle in self.particles:
             closest_food = particle.closest_food(self.foods)
             self.closest_food_dict[particle.name] = closest_food
         return self.closest_food_dict
-
-    # def run_simulation(self, closest_food_dict):
-    #         for particle in self.particles:
-    #             closest_food = closest_foods_dict[particle.name]
-    #             particle.move(closest_food)
-    #             collision = particle.check_collision(closest_food)
-                
-
-
-
-
-
 
     def spawn_random_food(self):
         random_position = self.random_position()
@@ -117,7 +97,7 @@ class Particle:
             self.size += 1
             self.hunger = 10
         return
-
+    
     def closest_food(self, foods):
         x,y = self.position
         if foods:
