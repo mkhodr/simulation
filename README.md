@@ -24,5 +24,5 @@ The graphical representation provides an intuitive way to observe and analyze th
 <br>
 <br>
 
-![](https://github.com/mkhodr/simulation/blob/main/500p5000n.gif)
-![](https://github.com/mkhodr/simulation/blob/main/100p1000n.gif)
+![](https://github.com/mkhodr/simulation/blob/main/500p3000ns.gif)
+![](https://github.com/mkhodr/simulation/blob/main/500p3000n.gif)
