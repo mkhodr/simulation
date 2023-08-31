@@ -6,7 +6,7 @@ from matplotlib.colors import Normalize
 import numpy as np
 
 
-arena = Arena(x=1000, y=1000 ,particle_no=500, food_no=10000)
+arena = Arena(x=500, y=500 ,particle_no=500, food_no=11200)
 times = []
 
 fig, ax = plt.subplots()
@@ -43,6 +43,6 @@ def animate(frames):
         plt.close()
     
 
-anim = FuncAnimation(fig, animate , interval=10, frames=300, )
+anim = FuncAnimation(fig, animate , interval=10, frames=150, )
 # video = anim.save(f'{arena.particle_no}p{arena.food_no}ns.gif', writer=PillowWriter(fps=15))
 plt.show()

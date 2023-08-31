@@ -5,3 +5,4 @@ teste.py
 /.vscode
 /__pycache__
 definitions_numpy.py
+*.gif

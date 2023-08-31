@@ -23,9 +23,18 @@ class Arena:
             food = self.spawn_random_food()
             position = (food.position.x, food.position.y)
             self.food_map[position] = food
+
         
         self.update_closest_food()
 
+    def check_double_food(self):
+            food = self.random_food()
+            position = (food.position.x, food.position.y)
+            if not self.food_map.get(position):
+                self.add_food(food)
+                self.food_map[position] = food
+            else:
+                food = self.random_food()
 
     def add_particle(self, Particle):
         self.particles.append(Particle)
@@ -35,7 +44,7 @@ class Arena:
         self.quadtree.insert(Food)
 
     def random_position(self):
-        random_position = Point(round(uniform(0, self.x-1), 1), round(uniform(0, self.y-1), 1))
+        random_position = Point(round(uniform(0, self.x-1), 4), round(uniform(0, self.y-1), 4))
         return random_position
     
     def check_collision(self):
@@ -44,11 +53,7 @@ class Arena:
         collisions = foods & particles
         if collisions:
             for collision in collisions:
-                collided_food = self.food_map.get(collision)
-                try:
-                    del self.food_map[collision]
-                except:
-                    continue
+                collided_food = self.food_map.pop(collision)
                 self.foods.remove(collided_food)
                 self.quadtree.remove(collided_food)
                 for particle in self.particles:
@@ -80,16 +85,15 @@ class Arena:
 
     def spawn_random_food(self):
         random_position = self.random_position()
-        nutrition_value = randint(5,9)
-        food = Food(nutrition_value, random_position)
-        self.add_food(food)
+        if not self.food_map.get(random_position):
+            nutrition_value = randint(1,7)
+            food = Food(nutrition_value, random_position)
+            self.add_food(food)
+        else:
+            self.spawn_random_food()
         return food
+    
 
-    def spawn_food(self, nutrition, position):
-        nutrition_value = nutrition
-        food = Food(nutrition_value, position)
-        self.add_food(food)
-        return food
 
     def spawn_random_particle(self):
         name = ''.join(choices(string.ascii_uppercase + string.digits, k=4))
@@ -100,12 +104,18 @@ class Arena:
         self.add_particle(particle)
         return particle
 
-    def spawn_particle(self, size, position):
-        name = ''.join(choices(string.ascii_uppercase + string.digits, k=4))
-        hunger = 0
-        particle = Particle(name, size, hunger, position)
-        self.add_particle(particle)
-        return particle
+
+    # def spawn_food(self, nutrition, position):
+    #     nutrition_value = nutrition
+    #     food = Food(nutrition_value, position)
+    #     self.add_food(food)
+    #     return food
+    # def spawn_particle(self, size, position):
+    #     name = ''.join(choices(string.ascii_uppercase + string.digits, k=4))
+    #     hunger = 0
+    #     particle = Particle(name, size, hunger, position)
+    #     self.add_particle(particle)
+    #     return particle
 
 
 
@@ -126,10 +136,13 @@ class Particle:
             self.hunger = 0
         return
     
-    def closest_food(self, quadtree, radius=100):
+    def closest_food(self, quadtree, radius=25):
         x,y = self.position.x, self.position.y
         range = Circle(x,y,radius)
         foods = quadtree.query(range)
+        if not foods:
+            range = Circle(x,y,radius+quadtree.bounds.width)
+            foods = quadtree.query(range)
         if foods:
             closest_food = min(foods, key=lambda food: math.sqrt((food.position.x - x)**2 + (food.position.y - y)**2))
             return closest_food
